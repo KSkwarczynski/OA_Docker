@@ -1,5 +1,5 @@
 #To run use:  docker build --secret id=tokens,src=tokens.txt -t mach3t2k .
-FROM kamilskwarczynski/mach3:latest AS mach3t2k_build
+FROM ghcr.io/mach3-software/mach3:alma9latest AS mach3t2k_build
 
 ENV MACH3_T2K_VERSION="feature_T2K_refactor_ND_updates"
 ENV MACH3_T2K_WORK_DIR=/opt/MaCh3T2K/
@@ -35,13 +35,38 @@ ENV NIWG_ROOT=${MACH3_T2K_WORK_DIR}/NIWGReWeight/build/
 ENV PATH=${NIWG_ROOT}/Linux/bin:${PATH} \
     LD_LIBRARY_PATH=${NIWG_ROOT}/Linux/lib:${LD_LIBRARY_PATH}
 
+#KS: Get inputs
+RUN ./setup_inputs.sh
+
+#Get psyche
+RUN ln -s $(which python3) /usr/local/bin/python
+
+WORKDIR ${MACH3_T2K_WORK_DIR}/psychestuff/
+RUN --mount=type=secret,id=tokens \
+    source /run/secrets/tokens && \
+    git clone https://oauth2:${GITLAB_TOKEN}@git.t2k.org/nd280/pilot/nd280SoftwarePilot.git nd280SoftwarePilot
+
+RUN --mount=type=secret,id=tokens \
+    source /run/secrets/tokens && \
+    git clone https://oauth2:${GITLAB_TOKEN}@git.t2k.org/nd280/highland2Software/highland2SoftwarePilot.git
+
+
+WORKDIR ${MACH3_T2K_WORK_DIR}
+RUN mkdir -p ${MACH3_T2K_WORK_DIR}/psychestuff
+
+RUN ./setup_psyche.sh
+
 RUN mkdir -p ${MACH3_T2K_INSTALL_DIR}
 WORKDIR ${MACH3_T2K_INSTALL_DIR}
 
 #KS Terrible hack calling NIWG RW setup and cmake allows to find NWIG RW without problems
-RUN source ${NIWG_ROOT}/Linux/bin/setup.NIWG.sh && cmake ../
-#-D CMAKE_FIND_DEBUG_MODE=ON
+RUN source ${NIWG_ROOT}/Linux/bin/setup.NIWG.sh \
+            && cd ${MACH3_T2K_WORK_DIR}/psychestuff/nd280SoftwarePilot \
+            && ./configure.sh \
+            && cd  ${MACH3_T2K_INSTALL_DIR} \
+            && source ${MACH3_T2K_WORK_DIR}/psychestuff/nd280SoftwarePilot/nd280SoftwarePilot.profile \
+            && source ${MACH3_T2K_WORK_DIR}/psychestuff/highland2SoftwarePilot/highland2SoftwarePilot.profile \
+            && source ${MACH3_T2K_WORK_DIR}psychestuff/psycheMaster_*/Linux*/setup.sh \
+            && cmake ../
 
 RUN make && make install
-
-RUN source ${MACH3_T2K_INSTALL_DIR}/bin/setup.MaCh3T2K.sh
