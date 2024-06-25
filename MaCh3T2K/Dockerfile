@@ -23,7 +23,7 @@ RUN git checkout ${MACH3_T2K_VERSION}
 #Get T2K SK Tool
 RUN --mount=type=secret,id=tokens \
     source /run/secrets/tokens && \
-    git clone https://oauth2:${GITLAB_TOKEN}@git.t2k.org/t2k-sk/t2ksk-common T2KSKTools
+    git clone https://oauth2:${GITLAB_TOKEN}@git.t2k.org/t2k-sk/t2ksk-common.git T2KSKTools
 RUN ./setup_T2KSKTools.sh
 
 #Get NIWG RW
