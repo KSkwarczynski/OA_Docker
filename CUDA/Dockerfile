@@ -1,5 +1,7 @@
 #docker build -t rocky9cudalatest .
-FROM nvidia/cuda:12.6.2-cudnn-runtime-rockylinux9 AS cuda_build
+#docker tag rocky9cudalatest kamilskwarczynski/nukamil
+#docker push kamilskwarczynski/nukamil:rocky9cudalatest
+FROM nvidia/cuda:12.6.2-cudnn-devel-rockylinux9 AS cuda_build
 
 # Install essential dependencies for ROOT and CUDA
 RUN dnf -y update \
