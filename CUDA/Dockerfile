@@ -1,4 +1,4 @@
-#
+#docker build -t rocky9cudalatest .
 FROM nvidia/cuda:12.6.2-cudnn-runtime-rockylinux9 AS cuda_build
 
 # Install essential dependencies for ROOT and CUDA
@@ -42,14 +42,9 @@ RUN cmake /opt/root-src \
 RUN make -j ${NCORES}
 RUN make install
 
-
-FROM nvidia/cuda:12.6.2-cudnn-runtime-rockylinux9
-
 ARG ROOT_VERSION=v6-30-04
-
-COPY --from=cuda_build /opt/root/${ROOT_VERSION} /opt/root/${ROOT_VERSION}
 
 ENV ROOTSYS=/opt/root/${ROOT_VERSION}
 ENV PATH=${ROOTSYS}/bin:${PATH} \
-    LD_LIBRARY_PATH=${ROOTSYS} \
-    Vdt_ROOT=${ROOTSYS} \
+    LD_LIBRARY_PATH=${ROOTSYS}/lib:${LD_LIBRARY_PATH} \
+    Vdt_ROOT=${ROOTSYS}
