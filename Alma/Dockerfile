@@ -86,6 +86,7 @@ RUN dnf -y install --setopt=install_weak_deps=False --nodocs epel-release && \
     ln -sf /usr/bin/python3.12 /usr/local/bin/python3 && \
     ln -sf /usr/bin/python3.12 /usr/local/bin/python && \
     ln -sf /usr/bin/pip3.12   /usr/local/bin/pip3 && \
+    ln -sf /usr/bin/pip3.12   /usr/local/bin/pip && \
     dnf clean all && rm -rf /var/cache/dnf /root/.cache
 
 # copy ROOT
@@ -107,6 +108,7 @@ RUN echo "source ${ROOTSYS}/bin/thisroot.sh" >> /etc/bashrc
 RUN source ${ROOTSYS}/bin/thisroot.sh && \
     root-config --version && \
     python3 --version && \
+    pip --version && \
     python3 -c "import ROOT; print(ROOT.gROOT.GetVersion())" && \
     ! ( find ${ROOTSYS}/lib -name '*.so*' -exec ldd {} + 2>/dev/null | grep "not found" | sort -u | grep . )
 
