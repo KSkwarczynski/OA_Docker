@@ -69,19 +69,19 @@ ARG ROOT_VERSION=v6-40-04
 # Python packages from pip (drop pyarrow if you don't need it, it is large)
 ARG PIP_PACKAGES="pyyaml matplotlib pyarrow"
 
-RUN dnf -y install --setopt=install_weak_deps=False --nodocs epel-release && \
-    dnf -y --enablerepo=crb install --setopt=install_weak_deps=False --nodocs \
-        git \
-        gcc gcc-c++ gcc-gfortran make cmake \
+RUN dnf -y install --setopt=install_weak_deps=False --nodocs dnf-plugins-core epel-release && \
+    dnf config-manager --set-enabled crb && \
+    dnf -y install --setopt=install_weak_deps=False --nodocs \
+        git gcc gcc-c++ gcc-gfortran make cmake \
         which findutils procps-ng less nano vim-minimal tmux openssh-clients tar gzip xz unzip \
         python3.12 python3.12-devel python3.12-pip python3.12-numpy \
         gl2ps giflib xrootd-libs xrootd-client-libs \
         libSM libICE libuuid ncurses-compat-libs krb5-libs fontconfig \
         libX11 libXpm libXft libXext libXt libXaw \
         mesa-libGLU libglvnd-opengl glew motif libpng libjpeg-turbo freetype \
-        sqlite-libs libxml2 davix-libs lz4-libs zlib xz-libs pcre \
+        sqlite-libs libX11-devel libomp-devel libxml2 davix-libs lz4-libs zlib xz-libs pcre \
         tbb tbb-devel protobuf libarrow \
-        fftw-libs gsl gmp hdf5 cfitsio graphviz && \
+        fftw-devel curl-devel gdb gsl gmp hdf5 cfitsio graphviz && \
     python3.12 -m pip install --no-cache-dir ${PIP_PACKAGES} && \
     ln -sf /usr/bin/python3.12 /usr/local/bin/python3 && \
     ln -sf /usr/bin/python3.12 /usr/local/bin/python && \
